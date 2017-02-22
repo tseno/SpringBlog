@@ -47,6 +47,33 @@
     <input type="submit" class="btn btn-default btn-lg" value="投稿" />
   </div>
 </form>
+        <div class="row">
+            <div class="col-md-2 col-lg-2"></div>
+            <div class="col-md-8 col-lg-8">
+                <div class="well well-sm">
+                    <div>アップロードするファイルを選択して、アップロードボタンを押下してください。</div>
+                    <br />
+                    <form id="data_upload_form" enctype="multipart/form-data" method="post">
+                        <div class="form-group">
+                            <label>■ファイル種類：</label>
+                            <select id="select_file_type" name="select_file_type" required="">
+                                <option value="login-user">ログインユーザー</option>
+                                <!-- アップロードするファイルを定義していく -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>■ファイルパス：</label>
+                            <input type="file" id="upload_file" name="upload_file" required="" />
+                        </div>
+                        <div class="form-group">
+                            <input id="data_upload_button" type="submit" value="アップロード" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-2 col-lg-2"></div>
+        </div>
+
 </div>
     <div class="col-sm-1"></div>
   </div>
@@ -56,6 +83,43 @@
   $(function() {
     $("#postDate").datepicker();
   });
+  
+//主処理部
+  $(function(){
+
+      // アップロードボタンを押下した
+      $("#data_upload_form").submit(function(event){
+          // 要素規定の動作をキャンセルする
+          event.preventDefault();
+
+          var ajaxUrl = "file/upload?";
+          // ファイル種類
+          ajaxUrl += "filetype=" + encodeURIComponent($("#upload_file")[0].files[0].name);
+          
+          alert(ajaxUrl);
+
+          if(window.FormData){
+              var formData = new FormData($(this)[0]);
+
+              $.ajax({
+                  type : "POST",                  // HTTP通信の種類
+                  url  : ajaxUrl,                 // リクエストを送信する先のURL
+                  dataType : "text",              // サーバーから返されるデータの型
+                  data : formData,                // サーバーに送信するデータ
+                  processData : false,
+                  contentType: false,
+              }).done(function(data) {        // Ajax通信が成功した時の処理
+                  alert("アップロードが完了しました。");
+              }).fail(function(XMLHttpRequest, textStatus, errorThrown) { // Ajax通信が失敗した時の処理
+                  alert("アップロードが失敗しました。");
+              });
+          }else{
+              alert("アップロードに対応できていないブラウザです。");
+          }
+      });
+  });
+
+
 </script>
 
 
