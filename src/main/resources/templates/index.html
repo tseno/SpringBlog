@@ -1,0 +1,74 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>top page</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/jquery-ui.min.js"></script>
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1/i18n/jquery.ui.datepicker-ja.min.js"></script>
+<link rel="stylesheet"
+	href="http://ajax.googleapis.com/ajax/libs/jqueryui/1/themes/redmond/jquery-ui.css"></link>
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"
+	integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+	crossorigin="anonymous"></link>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+	integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+	crossorigin="anonymous"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.13/datatables.min.js"></script>
+<link href="https://cdn.datatables.net/1.10.13/css/jquery.dataTables.min.css " rel="stylesheet"></link>
+<style>
+
+</style>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-1"></div>
+			<div class="col-md-10">
+
+				<h1>Blog index</h1>
+				<table  id="blogindex" class="display">
+					<thead>
+						<tr>
+							<th>ID</th>
+							<th>タイトル</th>
+							<th>本文</th>
+							<th>投稿日</th>
+						</tr>
+					</thead>
+					<tbody>
+					<tr th:each="blogForm : ${blogForms}" th:object="${blogForm}">
+							<td th:text="*{blogId}"></td>
+							<td th:text="*{title}"></td>
+							<td th:text="*{contents}"></td>
+							<td th:text="*{postDate} ? *{#temporals.format(postDate, 'yyyy/MM/dd')} : ''"></td>
+					</tr>
+					</tbody>
+				</table>
+				  <div class="row">  
+				    <input type="button" class="btn btn-primary btn-lg" onclick="window.location.href='/edit'" value="新規作成" />
+				  </div>				
+			</div>
+			<div class="col-md-1"></div>
+		</div>
+	</div>
+<script type="text/javascript">
+
+
+$(document).ready(function() {
+    var table = $('#blogindex').DataTable();
+    
+    $('#blogindex tbody').on('click', 'tr', function () {
+        var data = table.row( this ).data();
+        window.location.href="/edit/" + data[0];
+        
+    } );
+} );
+
+
+</script>
+	
+	
+</body>
+</html>
