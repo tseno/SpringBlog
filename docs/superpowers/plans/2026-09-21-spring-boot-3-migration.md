@@ -128,11 +128,11 @@ Co-authored-by: CommandCodeBot <noreply@commandcode.ai>
 
 - [ ] **Step 2: Maven Wrapper を現行版に置き換える**
 
-公式配布物から `mvnw` / `mvnw.cmd` を取得し、古い jar を削除する。Maven 本体のインストールは不要。
+公式配布物の `only-script` 版から `mvnw` / `mvnw.cmd` を取得する。Maven 本体のインストールは不要。`only-script` 版には jar が含まれず、`mvnw` は Maven 本体を直接ダウンロードする（`bin` 版の `mvnw` は `distributionType=only-script` を無視して jar を再取得し、未追跡ファイルが残るため使わない）。
 
 ```bash
 curl -sL -o /tmp/maven-wrapper.zip \
-  "https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper-distribution/3.3.4/maven-wrapper-distribution-3.3.4-bin.zip"
+  "https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper-distribution/3.3.4/maven-wrapper-distribution-3.3.4-only-script.zip"
 unzip -o /tmp/maven-wrapper.zip mvnw mvnw.cmd -d .
 rm -f .mvn/wrapper/maven-wrapper.jar
 chmod +x mvnw
@@ -146,7 +146,10 @@ chmod +x mvnw
 wrapperVersion=3.3.4
 distributionType=only-script
 distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.16/apache-maven-3.9.16-bin.zip
+distributionSha256Sum=5af3b743dd8b876b5c45da33b676251e5f1687712644abb4ee519ca56e1d89ce
 ```
+
+`distributionSha256Sum` は必須である。spec は「現行ラッパーはチェックサム検証が無い」ことを再生成の理由に挙げているが、`mvnw` はこのキーが存在する場合にのみ検証するため、書かなければ理由が達成されない。値は公式配布物 `apache-maven-3.9.16-bin.zip` の SHA-256（Maven Central 公開の SHA-512 と一致することを確認済み）:
 
 - [ ] **Step 4: `.gitignore` を作成する**
 
@@ -426,7 +429,14 @@ public class BlogController {
 
 		Blog blog = new Blog();
 
-		blog.setBlogId(blogform.getBlogId());
+		Integer blogId = blogform.getBlogId();
+
+		if (blogId != null && blogId != 0) {
+
+			blog.setBlogId(blogId);
+
+		}
+
 		blog.setTitle(blogform.getTitle());
 		blog.setContents(blogform.getContents());
 		blog.setPostDate(blogform.getPostDate());
@@ -694,7 +704,7 @@ Run: `grep -rn 'src="http://\|href="http://' src/main/resources/templates`
 Expected: 出力なし（`xmlns:th="http://www.thymeleaf.org"` は名前空間であり取得リンクではないため残ってよい）。
 
 Run: `grep -c 'https://ajax.googleapis.com' src/main/resources/templates/index.html src/main/resources/templates/edit.html`
-Expected: 各ファイル `3`。
+Expected: 各ファイル `4`（jQuery 本体の行が元から https のため、変換後の 3 件と合わせて 4 件になる）。jQuery UI に限定するなら `grep -c 'ajax.googleapis.com/ajax/libs/jqueryui'` が各ファイル `3`。
 
 - [ ] **Step 3: ブラウザで混在コンテンツが出ないことを確認する**
 
@@ -949,6 +959,8 @@ EOF
 **Interfaces:**
 - Consumes: Task 1〜6 のすべて
 - Produces: master へマージ可能な状態
+
+補足（実装時に判明・修正済み）: 新規作成 `POST /edit?edit` は、フォームが `blogId=0` を送るため `save()` が `merge` を選び、Hibernate 6 では対象行が存在しないため `StaleObjectStateException`（HTTP 500）となっていた。Hibernate 5 では新規挿入されていた挙動であり、移行による回帰。Task 2 の `BlogController.edit_post` は、id が `null` または `0` のとき id を設定しない形に修正済み。なお `GET /edit/{存在しないid}` が 500 になるのは、移行前の `findOne` が null を返して NPE になっていたのと挙動同等で、回帰ではない。
 
 - [ ] **Step 1: 既存 DB のバックアップを取得する**
 
