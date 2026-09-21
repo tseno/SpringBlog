@@ -83,7 +83,14 @@ public class BlogController {
 
 		Blog blog = new Blog();
 
-		blog.setBlogId(blogform.getBlogId());
+		Integer blogId = blogform.getBlogId();
+
+		if (blogId != null && blogId != 0) {
+
+			blog.setBlogId(blogId);
+
+		}
+
 		blog.setTitle(blogform.getTitle());
 		blog.setContents(blogform.getContents());
 		blog.setPostDate(blogform.getPostDate());
