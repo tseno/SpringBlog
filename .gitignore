@@ -1,0 +1,9 @@
+target/
+uploadfile/
+*.log
+.idea/
+*.iml
+.DS_Store
+.mvn/wrapper/maven-wrapper.jar
+.commandcode/
+.playwright-mcp/
