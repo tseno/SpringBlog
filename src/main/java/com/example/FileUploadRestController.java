@@ -6,6 +6,9 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -57,6 +60,14 @@ public class FileUploadRestController {
             // 異常終了時の処理
         }
 
+        // 保存先ディレクトリの外に書き込まれないよう、ファイル名だけを取り出す
+        String fileName = safeFileName(fileType);
+
+        if (fileName == null) {
+            logger.warn("ファイル名として使用できない filetype が指定されました");
+            return "error!";
+        }
+
         // ファイル種類から決まる値をセットする
         StringBuffer filePath = new StringBuffer("/uploadfile");   //ファイルパス
 
@@ -65,8 +76,7 @@ public class FileUploadRestController {
 
         try {
             // アップロードファイルを置く
-            File uploadFile =
-                    new File(uploadDir.getPath() + "/" + fileType);
+            File uploadFile = new File(uploadDir, fileName);
             byte[] bytes = multipartFile.getBytes();
             BufferedOutputStream uploadFileStream =
                     new BufferedOutputStream(new FileOutputStream(uploadFile));
@@ -78,6 +88,40 @@ public class FileUploadRestController {
         	return "error!";
         } catch (Throwable t) {
         	return "error!";
+        }
+    }
+
+    /**
+     * アップロードファイル名として安全な名前を取り出す
+     *
+     * パス区切りや ".." を含む入力からは最後の名前だけを取り出し、保存先ディレクトリの
+     * 外へ書き込まれることを防ぐ。ファイル名として使えない場合は null を返す。
+     *
+     * @param fileType リクエストで指定されたファイル名
+     * @return ディレクトリ要素を含まないファイル名。使用できない場合は null
+     */
+    static String safeFileName(String fileType) {
+
+        if (fileType == null) {
+            return null;
+        }
+
+        try {
+            Path fileName = Paths.get(fileType).getFileName();
+
+            if (fileName == null) {
+                return null;
+            }
+
+            String name = fileName.toString();
+
+            if (name.isBlank() || name.equals(".") || name.equals("..")) {
+                return null;
+            }
+
+            return name;
+        } catch (InvalidPathException e) {
+            return null;
         }
     }
 

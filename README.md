@@ -146,6 +146,7 @@ SPRING_DATASOURCE_PASSWORD=secret \
   - `filetype`: 保存時のファイル名
 - レスポンス: 成功時は `You successfully uploaded.`、失敗時は `error!`
 - 保存先: `/uploadfile/<yyyyMMddHHmmssSSS>/<filetype>`（コード上はファイルシステム直下の絶対パス）
+- `filetype` にディレクトリを含む値（`../` など）が指定された場合は、最後のファイル名部分のみを使用します。ファイル名として使えない値（`..`、空文字など）は `error!` を返します
 - 注意: 保存先は `/uploadfile` 固定で、設定では変更できません。macOS などルートが読み取り専用の環境では書き込みに失敗し `error!` を返します。
 
 ## DB 仕様
