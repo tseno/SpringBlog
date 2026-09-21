@@ -1,0 +1,20 @@
+services:
+  db:
+    image: postgres:16
+    container_name: springblog-db
+    environment:
+      POSTGRES_DB: mrs
+      POSTGRES_USER: mrs
+      POSTGRES_PASSWORD: mrs
+    ports:
+      - "5432:5432"
+    volumes:
+      - springblog-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mrs -d mrs"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  springblog-db-data:
