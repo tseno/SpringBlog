@@ -2,21 +2,18 @@ package com.example;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
-import javax.persistence.*;
-
-import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.*;
 
 @Entity
 public class Blog implements Serializable {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer blogId;
-	
+
 	private String title;
-	
+
 	private String contents;
 
 	private LocalDate postDate;
@@ -52,7 +49,5 @@ public class Blog implements Serializable {
 	public void setPostDate(LocalDate postDate) {
 		this.postDate = postDate;
 	}
-	
-	
 
 }
