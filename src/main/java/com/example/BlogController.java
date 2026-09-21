@@ -7,6 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -14,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 public class BlogController {
@@ -42,7 +44,8 @@ public class BlogController {
 	@GetMapping("/edit/{id}")
 	public String edit(Model model, @PathVariable int id) {
 
-		Blog blog = blogReposiroty.findById(id).orElseThrow();
+		Blog blog = blogReposiroty.findById(id)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
 		BlogForm blogForm = new BlogForm();
 
@@ -61,7 +64,14 @@ public class BlogController {
 	@PostMapping(value = "/edit", params = "delete")
 	public String delete(Model model, BlogForm blogform) {
 
-		blogReposiroty.deleteById(blogform.getBlogId());
+		Integer blogId = blogform.getBlogId();
+
+		//新規作成中や blogId 欠損の場合は削除対象がないため何もしない
+		if (blogId != null && blogId != 0) {
+
+			blogReposiroty.deleteById(blogId);
+
+		}
 
 		return "redirect:/";
 
@@ -86,6 +96,13 @@ public class BlogController {
 		Integer blogId = blogform.getBlogId();
 
 		if (blogId != null && blogId != 0) {
+
+			//編集中に他者が削除した場合など、対象が存在しなければ 404 とする
+			if (!blogReposiroty.existsById(blogId)) {
+
+				throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+
+			}
 
 			blog.setBlogId(blogId);
 

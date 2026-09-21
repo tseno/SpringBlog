@@ -110,8 +110,8 @@ src/main/resources/
 - `compose.yml` を追加する。
   - イメージ: `postgres:16`
   - `POSTGRES_DB=mrs`、`POSTGRES_USER=mrs`、`POSTGRES_PASSWORD=mrs`
-  - ポート `5432:5432`、named volume で永続化
-- `application.properties`: `spring.jpa.database=POSTGRESQL` を削除する（廃止された指定。残す場合の正しい値は小文字 `postgresql`）。接続先・認証情報は既存の `mrs` を踏襲し、`ddl-auto=update`、`spring.thymeleaf.cache=false` は維持する。
+  - ポート `127.0.0.1:5432:5432`（ホストの loopback のみに公開）、named volume で永続化
+- `application.properties`: `spring.jpa.database=POSTGRESQL` を削除する（このプロパティは Boot 3.5.16 にも存在し非推奨ではない。値の大文字・小文字も relaxed binding によりどちらも有効。削除するのは DB 種別が接続から自動判定され、指定が冗長になるため）。接続先・認証情報は既存の `mrs` を踏襲し、`ddl-auto=update`、`spring.thymeleaf.cache=false` は維持する。
 - 既存 DB のスキーマは Hibernate 5 が作成したもの。Hibernate 6 + `ddl-auto=update` で変更が入り得るため、検証前にダンプを取得する。
 
 ### 6. テンプレート
